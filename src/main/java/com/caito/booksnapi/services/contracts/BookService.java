@@ -2,6 +2,7 @@ package com.caito.booksnapi.services.contracts;
 
 import com.caito.booksnapi.api.models.requests.BookRequest;
 import com.caito.booksnapi.api.models.responses.BookResponse;
+import com.caito.booksnapi.api.models.responses.BorrowedResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
 
@@ -16,4 +17,6 @@ public interface BookService {
     void  createBook(BookRequest request, Authentication conectedUser);
     BookResponse getById(Long id);
     Page<BookResponse> getAll(int page, int size);
+    Page<BookResponse> getBooksByOwner(Long ownerId, int page, int size);
+    Page<BorrowedResponse> getBorrowedBooks(Authentication conectedUser, int page, int size);
 }

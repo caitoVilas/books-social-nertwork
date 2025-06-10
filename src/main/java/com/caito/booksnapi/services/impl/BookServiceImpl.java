@@ -4,15 +4,19 @@ import com.caito.booksnapi.api.exceptions.customs.BadRequestException;
 import com.caito.booksnapi.api.exceptions.customs.NotFoundException;
 import com.caito.booksnapi.api.models.requests.BookRequest;
 import com.caito.booksnapi.api.models.responses.BookResponse;
+import com.caito.booksnapi.api.models.responses.BorrowedResponse;
 import com.caito.booksnapi.persistence.entities.UserApp;
 import com.caito.booksnapi.persistence.repositories.BookRepository;
+import com.caito.booksnapi.persistence.repositories.BookTransactionHistoryRepository;
 import com.caito.booksnapi.services.contracts.BookService;
 import com.caito.booksnapi.utils.logs.WriteLog;
+import com.caito.booksnapi.utils.mappers.BookHistoryMapper;
 import com.caito.booksnapi.utils.mappers.BookMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +36,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BookServiceImpl implements BookService {
     private final BookRepository bookRepository;
+    private final BookTransactionHistoryRepository bookTransactionHistoryRepository;
 
     /**
      * Creates a new book.
@@ -78,9 +83,42 @@ public class BookServiceImpl implements BookService {
     @Transactional(readOnly = true)
     public Page<BookResponse> getAll(int page, int size) {
         log.info(WriteLog.logInfo("Fetching all books with pagination"));
-        PageRequest pr = PageRequest.of(page, size);
+        PageRequest pr = PageRequest.of(page, size, Sort.by("created").descending());
         return bookRepository.findAll(pr)
                 .map(BookMapper::mapToDto);
+    }
+
+    /**
+     * Retrieves books owned by a specific user with pagination.
+     *
+     * @param ownerId the ID of the owner
+     * @param page the page number to retrieve
+     * @param size the number of items per page
+     * @return a paginated list of BookResponse objects owned by the specified user
+     */
+    @Override
+    public Page<BookResponse> getBooksByOwner(Long ownerId, int page, int size) {
+        log.info(WriteLog.logInfo("Fetching books by owner ID: " + ownerId));
+        PageRequest pr = PageRequest.of(page, size, Sort.by("created").descending());
+        return bookRepository.findByOwnerId(ownerId, pr)
+                .map(BookMapper::mapToDto);
+    }
+
+    /**
+     * Retrieves books borrowed by the authenticated user with pagination.
+     *
+     * @param conectedUser the authenticated user
+     * @param page the page number to retrieve
+     * @param size the number of items per page
+     * @return a paginated list of BookResponse objects borrowed by the user
+     */
+    @Override
+    public Page<BorrowedResponse> getBorrowedBooks(Authentication conectedUser, int page, int size) {
+        log.info(WriteLog.logInfo("Fetching borrowed books for user: " + conectedUser.getName()));
+        UserApp user = (UserApp) conectedUser.getPrincipal();
+        PageRequest pr = PageRequest.of(page, size, Sort.by("created").descending());
+        return bookTransactionHistoryRepository.findAllBorrowedBooks(pr, user.getId())
+                .map(BookHistoryMapper::mapToDto);
     }
 
     /**

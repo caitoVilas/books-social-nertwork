@@ -3,30 +3,31 @@ package com.caito.booksnapi.services;
 import com.caito.booksnapi.api.exceptions.customs.BadRequestException;
 import com.caito.booksnapi.api.exceptions.customs.NotFoundException;
 import com.caito.booksnapi.api.models.requests.BookRequest;
-import com.caito.booksnapi.api.models.responses.BookResponse;
 import com.caito.booksnapi.persistence.entities.Book;
 import com.caito.booksnapi.persistence.entities.UserApp;
 import com.caito.booksnapi.persistence.repositories.BookRepository;
 import com.caito.booksnapi.services.impl.BookServiceImpl;
-import com.caito.booksnapi.utils.mappers.BookMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.Authentication;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 
+/**
+ * * Unit tests for the BookServiceImpl class.
+ * This class tests the methods for creating and fetching books.
+ *
+ * @author caito
+ *
+ */
 public class BookServiceImplTest {
     @Mock
     private BookRepository bookRepository;
@@ -71,21 +72,6 @@ public class BookServiceImplTest {
         assertTrue(exception.getErrors().contains("ISBN is required."));
     }
 
-   /*@DisplayName("Fetching book by valid ID")
-        @Test
-        void fetchingBookByValidId() {
-            Long id = 1L;
-            Book book = new Book();
-            UserApp owner = new UserApp();
-            //owner.fullname("Test Owner"); // si es necesario para el mapper
-            book.setOwner(owner);
-            when(bookRepository.findById(id)).thenReturn(Optional.of(book));
-            when(BookMapper.mapToDto(book)).thenReturn(new BookResponse());
-
-            BookResponse response = bookService.getById(id);
-            assertNotNull(response);
-            verify(bookRepository, times(1)).findById(id);
-        }*/
 
     @DisplayName("Fetching book by invalid ID throws NotFoundException")
     @Test

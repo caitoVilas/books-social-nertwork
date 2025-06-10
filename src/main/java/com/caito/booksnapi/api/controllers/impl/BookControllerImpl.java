@@ -3,6 +3,7 @@ package com.caito.booksnapi.api.controllers.impl;
 import com.caito.booksnapi.api.controllers.contracts.BookController;
 import com.caito.booksnapi.api.models.requests.BookRequest;
 import com.caito.booksnapi.api.models.responses.BookResponse;
+import com.caito.booksnapi.api.models.responses.BorrowedResponse;
 import com.caito.booksnapi.services.contracts.BookService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -42,10 +43,25 @@ public class BookControllerImpl implements BookController {
 
     @Override
     public ResponseEntity<Page<BookResponse>> getAll(int page, int size) {
-    Page<BookResponse> books = bookService.getAll(page, size);
-    if (books.isEmpty()) {
+        Page<BookResponse> books = bookService.getAll(page, size);
+        if (books.isEmpty())
+                return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(books);
+    }
+
+    @Override
+    public ResponseEntity<Page<BookResponse>> getBooksByOwner(Long ownerId, int page, int size) {
+        Page<BookResponse> books = bookService.getBooksByOwner(ownerId, page, size);
+        if (books.isEmpty())
             return ResponseEntity.noContent().build();
-        }
+        return ResponseEntity.ok(books);
+    }
+
+    @Override
+    public ResponseEntity<Page<BorrowedResponse>> getBorrowedBooks(Authentication conectedUser, int page, int size) {
+        Page<BorrowedResponse> books = bookService.getBorrowedBooks(conectedUser, page, size);
+        if (books.isEmpty())
+            return ResponseEntity.noContent().build();
         return ResponseEntity.ok(books);
     }
 }
